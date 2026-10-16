@@ -116,10 +116,46 @@ writeFileSync(join(sessionsRoot, '--E-project--', 'session-bbbb2222', 'session.v
 
 apply(ctx, { sessionsDir: sessionsRoot, exportDir, maxTextChars: 60000 });
 
+/**
+ * 工具返回值必须是**可无损序列化**的 JSON：宿主对不合规的输出直接判
+ * `value is not lossless JSON`，并让整次调用失败。
+ *
+ * 实测踩过：`session_health` 里写了 `code: missing ? "NO_SESSIONS" : undefined`，
+ * `undefined` 在 JSON.stringify 时被静默丢掉 —— 静态断言全过，一上真机就报错。
+ * 所以这里对**每一次**工具调用递归检查，而不是逐个字段去断言。
+ */
+function findNonJson(value, path = '$') {
+  if (value === undefined) return `${path} 是 undefined`;
+  if (typeof value === 'function') return `${path} 是函数`;
+  if (typeof value === 'symbol') return `${path} 是 symbol`;
+  if (typeof value === 'bigint') return `${path} 是 bigint`;
+  if (typeof value === 'number' && !Number.isFinite(value)) return `${path} 是 ${value}`;
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i += 1) {
+      const bad = findNonJson(value[i], `${path}[${i}]`);
+      if (bad) return bad;
+    }
+    return null;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, item] of Object.entries(value)) {
+      const bad = findNonJson(item, `${path}.${key}`);
+      if (bad) return bad;
+    }
+    return null;
+  }
+  return null;
+}
+
+const nonJsonValues = [];
+
 async function tool(name, args = {}) {
   const definition = registered.get(name);
   if (!definition) throw new Error(`工具未注册：${name}`);
-  return await definition.execute(args);
+  const value = await definition.execute(args);
+  const bad = findNonJson(value);
+  if (bad) nonJsonValues.push(`${name}: ${bad}`);
+  return value;
 }
 
 console.log('dsh-session-inspect 工具层自检\n');
@@ -301,6 +337,16 @@ assert(res.statusCode === 400, '没有任何可写字段时返回 400', String(r
 res = makeRes();
 await route.handler(makeReq({ method: 'GET', url: '/session-inspect/api/nope' }), res);
 assert(res.statusCode === 404, '未知路由返回 404', String(res.statusCode));
+
+// ---------------------------------------------------------------- 10. 返回值可无损序列化
+
+console.log('\n[10] 所有工具返回值都可无损序列化为 JSON（宿主硬要求）');
+assert(nonJsonValues.length === 0, `本轮 ${passed > 0 ? '' : ''}全部工具调用的返回值都合法`, nonJsonValues.slice(0, 3).join('；'));
+// 反向自检：确认这个检查器真的能抓到问题，否则"全过"毫无意义
+const probeBad = findNonJson({ ok: true, code: undefined });
+assert(typeof probeBad === 'string' && probeBad.includes('undefined'), '检查器本身能抓出 undefined 字段（反向自检）', String(probeBad));
+assert(findNonJson({ ok: true, nested: { list: [1, 'a', null] } }) === null, '检查器对合法值不误报');
+assert(findNonJson({ n: NaN }) !== null, '检查器能抓出 NaN');
 
 // ---------------------------------------------------------------- 汇总
 
