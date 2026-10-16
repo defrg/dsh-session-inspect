@@ -1,0 +1,78 @@
+{
+  "name": "dsh-session-inspect",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 插件：把会话日志（<DSH_HOME>/sessions/**/session.v4.jsonl.zstd）接成工具，用来查证「某个东西到底有没有投递到这个会话」。含会话列表/归纳、user-role 消息的 source.kind 核对、跨会话检索与导出。**正确处理多帧 zstd 拼接**——常规解压 API 只出第一帧且不报错。零第三方依赖。 | DSH plugin: inspect session logs, verify what was actually delivered to a session.",
+  "license": "MIT",
+  "author": "defrg (https://github.com/defrg)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/defrg/dsh-session-inspect.git"
+  },
+  "homepage": "https://github.com/defrg/dsh-session-inspect#readme",
+  "bugs": {
+    "url": "https://github.com/defrg/dsh-session-inspect/issues"
+  },
+  "type": "module",
+  "main": "./lib/index.js",
+  "scripts": {
+    "check": "node scripts/check-session-log.mjs && node scripts/check-tools.mjs",
+    "check:log": "node scripts/check-session-log.mjs",
+    "check:tools": "node scripts/check-tools.mjs"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./session-log": "./lib/session-log.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "session",
+    "transcript",
+    "zstd",
+    "diagnostics"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.4"
+  },
+  "engines": {
+    "dsh": ">=0.2.0-rc.2 <0.3.0-0",
+    "node": "^22.15.0 || >=24.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.4",
+    "@deepseek-ai/dsh": ">=0.2.0-rc.2 <0.3.0-0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

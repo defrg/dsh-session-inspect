@@ -1,0 +1,19 @@
+# dsh-session-inspect bundle 层：插入会话日志工具行。
+#
+# 这里**刻意不带任何本机路径**：不写 config 时插件会自己解析 DSH 数据根
+# （见 lib/session-log.js 的 resolveDshHome）——显式配置 → DSH_HOME 环境变量 → ~/.dsh。
+# 所以同一份 patch 在任何机器上都能用。
+#
+# config 字段（都可在「设置 → 插件 → dsh-session-inspect」里改，写入本 profile 覆盖层）：
+#   dshHome       DSH 数据根；留空 = DSH_HOME 环境变量，再退到 ~/.dsh
+#   sessionsDir   会话日志目录；留空 = <dshHome>/sessions
+#   exportDir     session_export 的落盘目录；留空 = <dshHome>/session-exports
+#   maxTextChars  返回文本截断上限（默认 20000）
+#   maxSessions   session_list 最多列多少个（默认 200）
+#
+# 本机固定下来就在下面加 config，例如：
+#   config:
+#     dshHome: 'C:\Users\<user>\.dsh'
+- insert:
+    - id: dsh-session-inspect
+      name: 'dsh-session-inspect'
