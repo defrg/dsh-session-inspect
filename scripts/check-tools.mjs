@@ -356,4 +356,9 @@ if (failed > 0) {
   console.error(`✗ ${failed} 项断言失败（通过 ${passed} 项）`);
   process.exit(1);
 }
+// 空跑即失败：passed + failed 就是断言被调用的次数。为 0 说明一条都没跑。
+if (passed + failed === 0) {
+  console.error('✗ 空跑：一条断言都没执行 —— 判为失败（不是通过）');
+  process.exit(1);
+}
 console.log(`✓ 全部 ${passed} 项断言通过 —— 工具在合成会话上工作正常，且能复现当初的排查结论`);

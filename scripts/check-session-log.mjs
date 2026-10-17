@@ -252,4 +252,10 @@ if (failed > 0) {
   console.error(`✗ ${failed} 项断言失败（通过 ${passed} 项）`);
   process.exit(1);
 }
+// 空跑即失败：passed + failed 就是断言被调用的次数。为 0 说明一条都没跑
+// （脚本被清空 / 提前退出 / 循环体没进），那种「绿」比红更危险。
+if (passed + failed === 0) {
+  console.error('✗ 空跑：一条断言都没执行 —— 判为失败（不是通过）');
+  process.exit(1);
+}
 console.log(`✓ 全部 ${passed} 项断言通过 —— 多帧 zstd 处理正确，归纳与检索正常`);

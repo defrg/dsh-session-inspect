@@ -15,9 +15,11 @@
   "type": "module",
   "main": "./lib/index.js",
   "scripts": {
-    "check": "node scripts/check-session-log.mjs && node scripts/check-tools.mjs",
+    "check": "node scripts/check-session-log.mjs && node scripts/check-tools.mjs && node scripts/check-golden.mjs",
     "check:log": "node scripts/check-session-log.mjs",
-    "check:tools": "node scripts/check-tools.mjs"
+    "check:tools": "node scripts/check-tools.mjs",
+    "check:golden": "node scripts/check-golden.mjs",
+    "check:golden:update": "node scripts/check-golden.mjs --update"
   },
   "exports": {
     ".": "./lib/index.js",

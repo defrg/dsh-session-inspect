@@ -1,0 +1,210 @@
+[
+  {
+    "name": "有 AGENTS.md 注入、无技能目录（当初排查的那个形态）",
+    "note": "agent-instructions 在、任何 skill 来源都不在 —— 这正是那次的结论形态",
+    "expected": {
+      "malformed": 0,
+      "summary": {
+        "meta": {
+          "id": "case-1",
+          "version": 4,
+          "createdAt": null,
+          "cwd": "E:\\project",
+          "parentSession": "parent-1",
+          "origin": "subagent",
+          "delegationDepth": null,
+          "agentPreset": "cordis"
+        },
+        "types": {
+          "session": 1,
+          "turn/start": 1,
+          "user/message": 3,
+          "step/start": 1,
+          "assistant/message": 1
+        },
+        "roles": {
+          "user": 3,
+          "assistant": 1
+        },
+        "sources": {
+          "user": 1,
+          "agent-instructions": 1,
+          "runtime-context": 1
+        },
+        "turns": 1,
+        "steps": 1,
+        "recordCount": 7,
+        "userMessages": [
+          {
+            "seq": 2,
+            "kind": "user",
+            "form": null,
+            "body": "去验证一下"
+          },
+          {
+            "seq": 3,
+            "kind": "agent-instructions",
+            "form": "instructions",
+            "body": "# 本机约定"
+          },
+          {
+            "seq": 4,
+            "kind": "runtime-context",
+            "form": "snapshot",
+            "body": "策略快照"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "有技能目录来源",
+    "note": "skill-catalog 这个 kind 必须被如实归入 sources",
+    "expected": {
+      "malformed": 0,
+      "summary": {
+        "meta": {
+          "id": "case-2",
+          "version": 4,
+          "createdAt": null,
+          "cwd": "E:\\other",
+          "parentSession": null,
+          "origin": null,
+          "delegationDepth": null,
+          "agentPreset": null
+        },
+        "types": {
+          "session": 1,
+          "user/message": 2
+        },
+        "roles": {
+          "user": 2
+        },
+        "sources": {
+          "user": 1,
+          "skill-catalog": 1
+        },
+        "turns": 0,
+        "steps": 0,
+        "recordCount": 3,
+        "userMessages": [
+          {
+            "seq": 1,
+            "kind": "user",
+            "form": null,
+            "body": "加载技能"
+          },
+          {
+            "seq": 2,
+            "kind": "skill-catalog",
+            "form": "catalog",
+            "body": "Available skills: a, b"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "坏行容错",
+    "note": "中间夹一行非 JSON：坏行单独计数，不能丢掉整个会话",
+    "expected": {
+      "malformed": 1,
+      "summary": {
+        "meta": {
+          "id": "case-3",
+          "version": 4,
+          "createdAt": null,
+          "cwd": null,
+          "parentSession": null,
+          "origin": null,
+          "delegationDepth": null,
+          "agentPreset": null
+        },
+        "types": {
+          "session": 1,
+          "turn/start": 1,
+          "user/message": 1
+        },
+        "roles": {
+          "user": 1
+        },
+        "sources": {
+          "user": 1
+        },
+        "turns": 1,
+        "steps": 0,
+        "recordCount": 3,
+        "userMessages": [
+          {
+            "seq": 2,
+            "kind": "user",
+            "form": null,
+            "body": "还能读到这条"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "多次 turn / step 与元信息",
+    "note": "turn 与 step 的计数口径一旦被改，这里会红",
+    "expected": {
+      "malformed": 0,
+      "summary": {
+        "meta": {
+          "id": "case-4",
+          "version": 4,
+          "createdAt": null,
+          "cwd": "D:\\work",
+          "parentSession": null,
+          "origin": "user",
+          "delegationDepth": 0,
+          "agentPreset": "default"
+        },
+        "types": {
+          "session": 1,
+          "turn/start": 2,
+          "step/start": 3,
+          "tool/call": 1,
+          "tool/result": 1
+        },
+        "roles": {
+          "tool": 1
+        },
+        "sources": {},
+        "turns": 2,
+        "steps": 3,
+        "recordCount": 8,
+        "userMessages": []
+      }
+    }
+  },
+  {
+    "name": "只有元信息的空会话",
+    "note": "全零的直方图也要稳定（空对象 vs 缺字段是两种不同的回归）",
+    "expected": {
+      "malformed": 0,
+      "summary": {
+        "meta": {
+          "id": "case-5",
+          "version": 4,
+          "createdAt": null,
+          "cwd": null,
+          "parentSession": null,
+          "origin": null,
+          "delegationDepth": null,
+          "agentPreset": null
+        },
+        "types": {
+          "session": 1
+        },
+        "roles": {},
+        "sources": {},
+        "turns": 0,
+        "steps": 0,
+        "recordCount": 1,
+        "userMessages": []
+      }
+    }
+  }
+]
